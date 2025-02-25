@@ -17,4 +17,5 @@ To run the Flask app:
 python app.py
 ```
 
-
+Architecture Diagram
+![image](https://github.com/user-attachments/assets/63e6c613-cd20-4b70-a84d-972e352cd2ae)
