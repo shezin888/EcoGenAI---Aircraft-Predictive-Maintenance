@@ -1,0 +1,102 @@
+from inference import get_model
+import supervision as sv
+import cv2
+
+# define the image url to use for inference
+image_file = "taylor-swift-album-1989.jpeg"
+image = cv2.imread(image_file)
+
+# load a pre-trained yolov8n model
+model = get_model(model_id="taylor-swift-records/3")
+
+# run inference on our chosen image, image can be a url, a numpy array, a PIL image, etc.
+results = model.infer(image)[0]
+
+# load the results into the supervision Detections api
+detections = sv.Detections.from_inference(results)
+
+# create supervision annotators
+bounding_box_annotator = sv.BoxAnnotator()
+label_annotator = sv.LabelAnnotator()
+
+# annotate the image with our inference results
+annotated_image = bounding_box_annotator.annotate(
+    scene=image, detections=detections)
+annotated_image = label_annotator.annotate(
+    scene=annotated_image, detections=detections)
+
+# display the image
+sv.plot_image(annotated_image)
+
+
+
+
+
+
+export ROBOFLOW_API_KEY="your_actual_api_key_here"
+
+
+
+
+
+RREEAALL TTIIMME
+import cv2
+import numpy as np
+import supervision as sv
+from inference import get_model
+import os
+
+# Load the API key from the environment
+API_KEY = os.getenv("ROBOFLOW_API_KEY")
+MODEL_ID = "your_model_id/version"  # Replace with your actual Roboflow model ID
+
+# Load the model
+model = get_model(model_id=MODEL_ID)
+
+# Open webcam (0 is the default camera, change if using an external camera)
+cap = cv2.VideoCapture(0)
+
+# Set video resolution (optional)
+cap.set(3, 640)  # Width
+cap.set(4, 480)  # Height
+
+# Create supervision annotators
+bounding_box_annotator = sv.BoxAnnotator()
+label_annotator = sv.LabelAnnotator()
+
+while True:
+    # Read a frame from the webcam
+    ret, frame = cap.read()
+    
+    if not ret:
+        print("Failed to capture image")
+        break
+    
+    # Convert frame to RGB (Roboflow expects RGB format)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # Run inference
+    results = model.infer(rgb_frame)
+
+    # Load results into supervision API
+    detections = sv.Detections.from_inference(results)
+
+    # Annotate image with bounding boxes
+    annotated_frame = bounding_box_annotator.annotate(
+        scene=frame, detections=detections
+    )
+    annotated_frame = label_annotator.annotate(
+        scene=annotated_frame, detections=detections
+    )
+
+    # Show annotated frame
+    cv2.imshow("Aircraft Part Tracking", annotated_frame)
+
+    # Press 'q' to exit
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release webcam and close windows
+cap.release()
+cv2.destroyAllWindows()
+
