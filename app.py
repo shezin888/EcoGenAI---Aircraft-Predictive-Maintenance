@@ -1,105 +1,106 @@
-from flask import Flask, request, jsonify, render_template, send_file
-import cv2
-import numpy as np
-import os
-import supervision as sv
-from inference import get_model
+import streamlit as st
+import requests
+from PIL import Image
+import io
 
-# Initialize Flask app
-app = Flask(__name__)
+# API Endpoints
+UPLOAD_URL = "http://127.0.0.1:8000/upload/"
+CHAT_URL = "http://127.0.0.1:8000/chat/"
+RESULT_IMAGE_PATH = "./results/output.jpg"
+ROBOFLOW_API_URL = "https://api.roboflow.com"
 
-# Load the model
-MODEL_ID = "innovation-hangar-v2/1"
-model = get_model(model_id=MODEL_ID)
 
-# Upload folders
-UPLOAD_FOLDER = "uploads"
-RESULT_FOLDER = "results"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(RESULT_FOLDER, exist_ok=True)
+# ✅ Ensure `st.set_page_config()` is the first Streamlit command
+st.set_page_config(page_title="Predictive Maintenance AI", layout="wide")
 
-# Function to clear old results before saving new ones
-def clear_old_results():
-    for file in os.listdir(RESULT_FOLDER):
-        file_path = os.path.join(RESULT_FOLDER, file)
-        try:
-            os.remove(file_path)
-        except Exception as e:
-            print(f"Error deleting file {file_path}: {e}")
+# Custom CSS for a better UI experience
+st.markdown("""
+    <style>
+        .stButton > button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .stTextArea > textarea {
+            font-size: 16px;
+        }
+        .stTextInput > div > div > input {
+            font-size: 16px;
+        }
+        .sidebar .sidebar-content {
+            background-color: #1E1E1E;
+            color: white;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-@app.route("/", methods=["GET"])
-def home():
-    return render_template("index.html")
+# Streamlit App Layout
+st.title("🚀 Predictive Maintenance AI")
+st.markdown("Upload an image of your equipment and chat with AI for maintenance insights.")
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    if "file" not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
-    
-    file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"error": "No selected file"}), 400
+# Layout with Two Columns: Image Upload & Chatbox
+col1, col2 = st.columns([1, 1.2])
 
-    # Clear previous result images
-    clear_old_results()
+# 📌 Column 1: Image Upload and Prediction
+with col1:
+    st.subheader("📸 Upload Equipment Image")
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
-    # Save the uploaded image
-    image_path = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(image_path)
+    prediction_result = None
+    annotated_image_url = None
 
-    # Read and process the image
-    image = cv2.imread(image_path)
+    if uploaded_file:
+        # Show image preview
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
 
-    # Run inference
-    results = model.infer(image)[0]
+        # Upload Image to Backend
+        with st.spinner("🛠️ Processing image..."):
+            files = {"file": uploaded_file.getvalue()}
+            response = requests.post(UPLOAD_URL, files=files)
 
-    # Load results into Supervision Detections API
-    detections = sv.Detections.from_inference(results)
+            if response.status_code == 200:
+                response_json = response.json()
+                prediction_result = response_json.get("predictions", [])
+                annotated_image_url = response_json.get("annotated_image_url")
+                if prediction_result:
+                    detected_faults = "\n".join([f"✅ {p['label']} - {p['confidence']}" for p in prediction_result])
+                    st.success(f"🔍 **Detected Faults:**\n{detected_faults}")
 
-    # Extract detected parts and confidence scores
-    prediction_data = []
-    labels = []  # Labels for bounding boxes
-    for i in range(len(detections.class_id)):
-        class_id = int(detections.class_id[i])  # Convert NumPy int64 to Python int
-        confidence = float(detections.confidence[i]) * 100  # Convert NumPy float to Python float
+                    # Display Annotated Image (Bounding Boxes)
+                    if annotated_image_url:
+                        st.image(RESULT_IMAGE_PATH, caption="🖼️ Predicted Image", use_container_width=True)
+                else:
+                    st.warning("⚠️ No faults detected in the image.")
+            else:
+                st.error("❌ Error processing image!")
 
-        # Map class IDs to actual class names (modify this based on your model's classes)
-        class_names = {0: "Crack", 1: "Dent", 2: "Other"}  # Adjust based on your trained model
-        class_label = class_names.get(class_id, "Unknown")  # Default to 'Unknown' if not mapped
+# 📌 Column 2: AI Chatbox (ONLY ENABLED AFTER PREDICTION)
+with col2:
+    st.subheader("💬 AI Chatbot - Get Maintenance Insights")
 
-        # Assign unique numbers to each detection type
-        label_text = f"{class_label} #{i+1}"
-        
-        # Store for UI display
-        prediction_data.append({"label": label_text, "confidence": f"{confidence:.2f}%"})
-        
-        # Store for bounding box annotation
-        labels.append(label_text)
+    if prediction_result:
+        user_input = st.text_area("Ask a question about the detected issue:", placeholder="Type your question here...")
 
-    # Create supervision annotators with the correct labels
-    bounding_box_annotator = sv.BoxAnnotator()
-    label_annotator = sv.LabelAnnotator()
+        if st.button("📝 Generate Report", key="chat_button"):
+            with st.spinner("🤖 Fetching AI response..."):
+                chat_payload = {
+                    "prompt": user_input,
+                    "predictions": prediction_result
+                }
+                response = requests.post(CHAT_URL, json=chat_payload)
 
-    # Annotate the image with bounding boxes and labels
-    annotated_image = bounding_box_annotator.annotate(
-        scene=image, detections=detections)
-    annotated_image = label_annotator.annotate(
-        scene=annotated_image, detections=detections, labels=labels  # Use numbered labels
-    )
+            if response.status_code == 200:
+                chat_response = response.json()
 
-    # Save the output image
-    result_path = os.path.join(RESULT_FOLDER, "output.jpg")
-    cv2.imwrite(result_path, annotated_image)
+                print("Raw Chat API Response:", chat_response)  # Debugging
 
-    return jsonify({
-        "message": "Analysis complete!",
-        "predictions": prediction_data,
-        "annotated_image_url": "/results/output.jpg"
-    })
+                st.markdown("### 🧠 AI Response")
 
-@app.route("/results/output.jpg")
-def get_annotated_image():
-    return send_file(os.path.join(RESULT_FOLDER, "output.jpg"), mimetype="image/jpeg")
-
-if __name__ == "__main__":
-    app.run(debug=True)
+                if "response" in chat_response:
+                    st.info(chat_response["response"])
+                else:
+                    st.error("❌ AI response not available. Check server logs.")
+ 
