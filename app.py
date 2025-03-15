@@ -4,11 +4,19 @@ from PIL import Image
 import io
 
 # API Endpoints
-UPLOAD_URL = "http://127.0.0.1:8000/upload/"
-AUDIO_UPLOAD_URL = "http://127.0.0.1:8000/upload_audio/"
-CHAT_URL = "http://127.0.0.1:8000/chat/"
+#UPLOAD_URL = "http://127.0.0.1:8000/upload/"
+#AUDIO_UPLOAD_URL = "http://127.0.0.1:8000/upload_audio/"
+#CHAT_URL = "http://127.0.0.1:8000/chat/"
+UPLOAD_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/upload/"
+AUDIO_UPLOAD_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/upload_audio/"
+CHAT_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/chat/"
+
+
 RESULT_IMAGE_PATH = "./results/output.jpg"
 ROBOFLOW_API_URL = "https://api.roboflow.com"
+
+
+
 
 # ✅ Ensure `st.set_page_config()` is the first Streamlit command
 st.set_page_config(page_title="Predictive Maintenance AI", layout="wide")
