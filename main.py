@@ -13,6 +13,8 @@ from openai import OpenAI
 from pydantic import BaseModel
 from mistralai import Mistral, UserMessage
 import configure
+from fastapi.staticfiles import StaticFiles
+import time
 
 UPLOAD_DIR = "uploads/"
 RESULT_FOLDER = "results/"  
@@ -99,7 +101,7 @@ async def upload_image(file: UploadFile = File(...)):
     return JSONResponse(content={
         "message": "Analysis complete!",
         "predictions": prediction_data,
-        "annotated_image_url": f"{render_base_url}/results/output.jpg"
+        "annotated_image_url": f"{render_base_url}/results/output.jpg?timestamp={int(time.time())}"
     })
 
 
@@ -140,3 +142,6 @@ async def upload_audio(file: UploadFile = File(...)):
     return JSONResponse(content={
         "message": "Engine Lubrication low and need maintenance"
     })
+    
+# Serve static files for the results folder
+app.mount("/results", StaticFiles(directory="results"), name="results")
