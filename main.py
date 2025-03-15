@@ -14,6 +14,13 @@ from pydantic import BaseModel
 from mistralai import Mistral, UserMessage
 import configure
 
+UPLOAD_DIR = "uploads/"
+RESULT_FOLDER = "results/"  
+
+# Ensure the results directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(RESULT_FOLDER, exist_ok=True)
+
 render_base_url = "https://ecogenai-aircraft-predictive-maintenance.onrender.com"
 result_path = os.path.join(RESULT_FOLDER, "output.jpg")
 
