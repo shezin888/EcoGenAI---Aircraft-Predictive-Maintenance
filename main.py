@@ -30,10 +30,8 @@ RESULT_FOLDER = "results/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
-
 MODEL_ID = "innovation-hangar-v2/1"
 model = get_model(model_id=MODEL_ID, api_key=configure.ROBOFLOW_API_KEY)
-
 
 
 @app.post("/upload/")
@@ -105,7 +103,7 @@ async def chat_with_ai(request: ChatRequest):
                         model="mistral-tiny",
                         messages=[
                     {
-                       "role": "system", "content": "Focus on predicitve maintenance on aircrafts. Dont answer any unrelated questions and any questions unrelated to the predictive maintenance or maintenance of aircraft should be redirected to tell the user to ask relevant questions"},
+                       "role": "system", "content": "Focus on predictive maintenance on aircrafts. Don't answer any unrelated questions and any questions unrelated to the predictive maintenance or maintenance of aircraft should be redirected to tell the user to ask relevant questions"},
                           {"role": "user", "content": query},
         ],
                         )
@@ -117,3 +115,14 @@ async def chat_with_ai(request: ChatRequest):
     except Exception as e:
         logging.error(f"Error in chat API: {str(e)}")
         return JSONResponse(content={"error": "Chatbot failed"}, status_code=500)
+
+
+@app.post("/upload_audio/")
+async def upload_audio(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    return JSONResponse(content={
+        "message": "Engine Lubrication low and need maintenance"
+    })

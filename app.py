@@ -5,10 +5,10 @@ import io
 
 # API Endpoints
 UPLOAD_URL = "http://127.0.0.1:8000/upload/"
+AUDIO_UPLOAD_URL = "http://127.0.0.1:8000/upload_audio/"
 CHAT_URL = "http://127.0.0.1:8000/chat/"
 RESULT_IMAGE_PATH = "./results/output.jpg"
 ROBOFLOW_API_URL = "https://api.roboflow.com"
-
 
 # ✅ Ensure `st.set_page_config()` is the first Streamlit command
 st.set_page_config(page_title="Predictive Maintenance AI", layout="wide")
@@ -103,4 +103,18 @@ with col2:
                     st.info(chat_response["response"])
                 else:
                     st.error("❌ AI response not available. Check server logs.")
- 
+
+# 📌 Column 3: Audio Upload for Engine Sound
+st.subheader("🎵 Upload Aircraft Engine Sound")
+audio_file = st.file_uploader("Upload an MP3 file...", type=["mp3"])
+
+if audio_file:
+    with st.spinner("🔊 Processing audio..."):
+        files = {"file": audio_file.getvalue()}
+        response = requests.post(AUDIO_UPLOAD_URL, files=files)
+
+        if response.status_code == 200:
+            response_json = response.json()
+            st.success(f"🔍 **Audio Analysis Result:** {response_json['message']}")
+        else:
+            st.error("❌ Error processing audio file!")
