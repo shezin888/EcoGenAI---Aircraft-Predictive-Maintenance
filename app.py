@@ -12,7 +12,7 @@ AUDIO_UPLOAD_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.co
 CHAT_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/chat/"
 
 
-RESULT_IMAGE_PATH = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/results/output.jpg"
+#RESULT_IMAGE_PATH = "./results/output.jpg"
 ROBOFLOW_API_URL = "https://api.roboflow.com"
 
 
@@ -78,8 +78,11 @@ with col1:
                     st.success(f"🔍 **Detected Faults:**\n{detected_faults}")
 
                     # Display Annotated Image (Bounding Boxes)
+                    #if annotated_image_url:
+                        #st.image(RESULT_IMAGE_PATH, caption="🖼️ Predicted Image", use_container_width=True)
                     if annotated_image_url:
-                        st.image(RESULT_IMAGE_PATH, caption="🖼️ Predicted Image", use_container_width=True)
+                        st.image(annotated_image_url, caption="🖼️ Predicted Image", use_container_width=True)
+
                 else:
                     st.warning("⚠️ No faults detected in the image.")
             else:
