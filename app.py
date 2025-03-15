@@ -12,7 +12,7 @@ AUDIO_UPLOAD_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.co
 CHAT_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/chat/"
 
 
-RESULT_IMAGE_PATH = "./results/output.jpg"
+RESULT_IMAGE_PATH = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/results/output.jpg"
 ROBOFLOW_API_URL = "https://api.roboflow.com"
 
 
