@@ -14,6 +14,8 @@ from pydantic import BaseModel
 from mistralai import Mistral, UserMessage
 import configure
 
+render_base_url = "https://ecogenai-aircraft-predictive-maintenance.onrender.com"
+result_path = os.path.join(RESULT_FOLDER, "output.jpg")
 
 #MISTRAL_API_KEY = configure.MISTRAL_API_KEY
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
@@ -90,7 +92,7 @@ async def upload_image(file: UploadFile = File(...)):
     return JSONResponse(content={
         "message": "Analysis complete!",
         "predictions": prediction_data,
-        "annotated_image_url": f"/results/output.jpg"
+        "annotated_image_url": f"{render_base_url}/results/output.jpg"
     })
 
 
