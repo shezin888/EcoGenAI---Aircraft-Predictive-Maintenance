@@ -15,7 +15,10 @@ from mistralai import Mistral, UserMessage
 import configure
 
 
-MISTRAL_API_KEY = configure.MISTRAL_API_KEY
+#MISTRAL_API_KEY = configure.MISTRAL_API_KEY
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
+
 
 client = Mistral(api_key=MISTRAL_API_KEY)
 
@@ -31,7 +34,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
 MODEL_ID = "innovation-hangar-v2/1"
-model = get_model(model_id=MODEL_ID, api_key=configure.ROBOFLOW_API_KEY)
+model = get_model(model_id=MODEL_ID, api_key=ROBOFLOW_API_KEY)
+
+#model = get_model(model_id=MODEL_ID, api_key=configure.ROBOFLOW_API_KEY)
 
 
 @app.post("/upload/")
