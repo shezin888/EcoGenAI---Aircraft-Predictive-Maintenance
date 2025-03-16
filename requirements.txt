@@ -153,3 +153,4 @@ watchdog==6.0.0
 wheel==0.45.0
 yarl==1.18.3
 zxing-cpp==2.2.0
+streamlit-elements
