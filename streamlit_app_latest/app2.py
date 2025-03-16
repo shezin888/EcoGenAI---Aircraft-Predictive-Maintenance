@@ -3,6 +3,7 @@ import requests
 from PIL import Image
 import io
 import streamlit.components.v1 as components
+from streamlit.components.v1 import html
 
 # API Endpoints
 UPLOAD_URL = "http://127.0.0.1:8000/upload/"
@@ -15,39 +16,73 @@ ROBOFLOW_API_URL = "https://api.roboflow.com"
 # ✅ Ensure `st.set_page_config()` is the first Streamlit command
 st.set_page_config(page_title="✈️ EcoGenAI - AI for Aircraft Maintenance", layout="wide")
 
-# Injecting the Particles.js script for live animated background
-components.html("""
-    <div id="particles-js" style="position:fixed; width:100%; height:100vh; z-index:-1;"></div>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": {"value": 80, "density": {"enable": true, "value_area": 800}},
-                "color": {"value": "#00AEEF"},
-                "shape": {"type": "circle"},
-                "opacity": {"value": 0.5},
-                "size": {"value": 3, "random": true},
-                "move": {"enable": true, "speed": 2, "direction": "none"}
+html(
+    """
+<html>
+<head>
+   <script src = "https://cdnjs.cloudflare.com/ajax/libs/tsparticles/1.18.11/tsparticles.min.js"> </script>
+   <style>
+      #particles {
+         width: 5000px;
+         height: 5000px;
+         background-color: lightgreen;
+      }
+   </style>
+</head>
+<body>
+   <div id = "particles">
+   </div>
+   <script>
+      tsParticles.load("particles", {
+         particles: {
+            number: {
+               value: 1000
             },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": {"onhover": {"enable": true, "mode": "repulse"}}
+            move: {
+               enable: true
             },
-            "retina_detect": true
-        });
-    </script>
-""", height=0)
+            color: {
+               value: "#fcfcfc"
+            },
+         }
+      });
+   </script>
+</body>
+</html>
+""",
+    height=20000,
+    width=20000,
+)
+
+
+# Add css to make the iframe fullscreen
+
+st.markdown(
+    """
+<style>
+    iframe {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
 # Enhanced Custom CSS for animations
 st.markdown("""
     <style>
+        
         body {
-            background-color: #1A2B44;
-            color: white;
             font-family: 'Arial', sans-serif;
         }
+        p{
+            color: black;
+        }
         .stApp {
-            background: linear-gradient(to right, #001F3F, #0074D9);
             color: white;
             padding: 20px;
         }
@@ -63,6 +98,7 @@ st.markdown("""
         }
         .stButton > button:hover {
             background: #00AEEF;
+            
         }
         .stTextArea > textarea, .stTextInput > div > div > input {
             font-size: 16px;
@@ -99,28 +135,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Add Particles.js for animated background
-st.markdown("""
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <div id="particles-js" style="position:fixed; width:100%; height:100vh; z-index:-1;"></div>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 80, "density": {"enable": true, "value_area": 800} },
-                "color": { "value": "#00AEEF" },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.5 },
-                "size": { "value": 3, "random": true },
-                "move": { "enable": true, "speed": 2, "direction": "none" }
-            },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": { "onhover": {"enable": true, "mode": "repulse"} }
-            },
-            "retina_detect": true
-        });
-    </script>
-""", unsafe_allow_html=True)
+
+
+
+
 
 
 # Streamlit App Layout
