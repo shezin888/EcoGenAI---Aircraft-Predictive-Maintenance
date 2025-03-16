@@ -140,7 +140,7 @@ async def upload_audio(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     
     return JSONResponse(content={
-        "message": "Engine Lubrication low and need maintenance"
+        "message": "Detected an abnormal increase in low-frequency vibrations, indicating possible misalignment or early-stage bearing wear. The engine noise spectrum also shows irregular combustion patterns, which may suggest fuel flow inconsistencies or clogged injectors. Additionally, a high-pitched whine detected at certain RPM ranges could point to compressor blade damage or airflow obstructions. Further diagnostics are recommended to confirm potential turbine wear and ensure optimal engine performance."
     })
     
 # Serve static files for the results folder
