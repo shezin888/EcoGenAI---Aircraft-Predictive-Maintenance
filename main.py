@@ -14,22 +14,23 @@ from pydantic import BaseModel
 from mistralai import Mistral, UserMessage
 import configure
 from fastapi.staticfiles import StaticFiles
-import time
+import time 
 
 UPLOAD_DIR = "uploads/"
-RESULT_FOLDER = "results/"  
+RESULT_FOLDER = "results/"
 
-# Ensure the results directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
 render_base_url = "https://ecogenai-aircraft-predictive-maintenance.onrender.com"
 result_path = os.path.join(RESULT_FOLDER, "output.jpg")
 
+
 #MISTRAL_API_KEY = configure.MISTRAL_API_KEY
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 
+#MISTRAL_API_KEY = configure.MISTRAL_API_KEY
 
 client = Mistral(api_key=MISTRAL_API_KEY)
 
@@ -38,22 +39,23 @@ app = FastAPI()
 class ChatRequest(BaseModel):
     prompt: str
     predictions: list
+    file_type: str
 
 UPLOAD_DIR = "uploads/"
 RESULT_FOLDER = "results/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
+
 MODEL_ID = "innovation-hangar-v2/1"
 model = get_model(model_id=MODEL_ID, api_key=ROBOFLOW_API_KEY)
 
-#model = get_model(model_id=MODEL_ID, api_key=configure.ROBOFLOW_API_KEY)
 
 
 @app.post("/upload/")
 async def upload_image(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
-    
+
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
@@ -79,10 +81,10 @@ async def upload_image(file: UploadFile = File(...)):
 
         # Assign unique numbers to each detection type
         label_text = f"{class_label} #{i+1}"
-        
+
         # Store for UI display
         prediction_data.append({"label": label_text, "confidence": f"{confidence:.2f}%"})
-        
+
         # Store for bounding box annotation
         labels.append(label_text)
 
@@ -107,31 +109,49 @@ async def upload_image(file: UploadFile = File(...)):
 
 @app.post("/chat/")
 async def chat_with_ai(request: ChatRequest):
-    faults_detected = ", ".join([f"{p['label']} ({p['confidence']})" for p in request.predictions])
+    """
+    AI Chat function that dynamically formats the query based on file type (image or audio).
+    """
+ 
+    if request.file_type == "image":
+        faults_detected = ", ".join([f"{p['label']} ({p['confidence']})" for p in request.predictions])
+        query = f"The image uploaded shows {faults_detected} based on the AI prediction. {request.prompt}"
 
-    query = f"The image uploaded shows {faults_detected} based on the AI prediction. {request.prompt}"
+    elif request.file_type == "audio":
+        faults_detected = ", ".join([f"{p['label']} ({p['confidence']})" for p in request.predictions])
+        query = f"The uploaded aircraft sound has been analyzed, and the AI detected {faults_detected}. {request.prompt}"
+
+    else:
+        return JSONResponse(content={"error": "Invalid file type"}, status_code=400)
+    
+ 
     logging.info(f"Chat Query: {query}")
 
     try:
-        # Send Request to Mistral AI
-       
-       chat_response = client.chat.complete(
-                        model="mistral-tiny",
-                        messages=[
-                    {
-                       "role": "system", "content": "Focus on predictive maintenance on aircrafts. Don't answer any unrelated questions and any questions unrelated to the predictive maintenance or maintenance of aircraft should be redirected to tell the user to ask relevant questions"},
-                          {"role": "user", "content": query},
-        ],
-                        )
+        # ✅ Send Query to Mistral AI
+        chat_response = client.chat.complete(
+            model="mistral-tiny",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Focus on predictive maintenance of aircrafts. "
+                        "Do not answer unrelated questions. "
+                        "If the query is irrelevant, ask the user to focus on aircraft maintenance."
+                    )
+                },
+                {"role": "user", "content": query},
+            ],
+        )
 
-       assistant_response = chat_response.choices[0].message.content if chat_response.choices else "No response"
+        # ✅ Extract AI Response
+        assistant_response = chat_response.choices[0].message.content if chat_response.choices else "No response"
 
-       return JSONResponse(content={"response": assistant_response})
+        return JSONResponse(content={"response": assistant_response})
 
     except Exception as e:
         logging.error(f"Error in chat API: {str(e)}")
         return JSONResponse(content={"error": "Chatbot failed"}, status_code=500)
-
 
 @app.post("/upload_audio/")
 async def upload_audio(file: UploadFile = File(...)):
@@ -142,6 +162,6 @@ async def upload_audio(file: UploadFile = File(...)):
     return JSONResponse(content={
         "message": "Detected an abnormal increase in low-frequency vibrations, indicating possible misalignment or early-stage bearing wear. The engine noise spectrum also shows irregular combustion patterns, which may suggest fuel flow inconsistencies or clogged injectors. Additionally, a high-pitched whine detected at certain RPM ranges could point to compressor blade damage or airflow obstructions. Further diagnostics are recommended to confirm potential turbine wear and ensure optimal engine performance."
     })
-    
+
 # Serve static files for the results folder
 app.mount("/results", StaticFiles(directory="results"), name="results")

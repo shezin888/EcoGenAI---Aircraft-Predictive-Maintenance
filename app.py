@@ -3,52 +3,98 @@ import requests
 from PIL import Image
 import io
 import streamlit.components.v1 as components
+from streamlit.components.v1 import html
 
 # API Endpoints
-#UPLOAD_URL = "http://127.0.0.1:8000/upload/"
-#AUDIO_UPLOAD_URL = "http://127.0.0.1:8000/upload_audio/"
-#CHAT_URL = "http://127.0.0.1:8000/chat/"
+# UPLOAD_URL = "http://127.0.0.1:8000/upload/"
+# AUDIO_UPLOAD_URL = "http://127.0.0.1:8000/upload_audio/"
+# CHAT_URL = "http://127.0.0.1:8000/chat/"
+
 UPLOAD_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/upload/"
 AUDIO_UPLOAD_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/upload_audio/"
 CHAT_URL = "https://ecogenai-aircraft-predictive-maintenance.onrender.com/chat/"
 
-
-#RESULT_IMAGE_PATH = "./results/output.jpg"
 ROBOFLOW_API_URL = "https://api.roboflow.com"
+
 
 # ✅ Ensure `st.set_page_config()` is the first Streamlit command
 st.set_page_config(page_title="✈️ EcoGenAI - AI for Aircraft Maintenance", layout="wide")
 
-# Injecting the Particles.js script for live animated background
-components.html("""
-    <div id="particles-js" style="position:fixed; width:100%; height:100vh; z-index:-1;"></div>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": {"value": 80, "density": {"enable": true, "value_area": 800}},
-                "color": {"value": "#00AEEF"},
-                "shape": {"type": "circle"},
-                "opacity": {"value": 0.5},
-                "size": {"value": 3, "random": true},
-                "move": {"enable": true, "speed": 2, "direction": "none"}
+html(
+    """
+<html>
+<head>
+   <script src = "https://cdnjs.cloudflare.com/ajax/libs/tsparticles/1.18.11/tsparticles.min.js"> </script>
+   <style>
+      #particles {
+         width: 5000px;
+         height: 5000px;
+         
+      }
+   </style>
+</head>
+<body>
+   <div id = "particles">
+   </div>
+   <script>
+      tsParticles.load("particles", {
+         background: {
+                
+                image: "linear-gradient(to right, #001F3F, #0074D9);",
+                position: "50% 50%",
+                size: "cover",
+                repeat: "no-repeat"
             },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": {"onhover": {"enable": true, "mode": "repulse"}}
+         particles: {
+            number: {
+               value: 1000
             },
-            "retina_detect": true
-        });
-    </script>
-""", height=0)
+            move: {
+               enable: true
+            },
+            color: {
+               value: "#fcfcfc"
+            },
+         }
+      });
+   </script>
+</body>
+</html>
+""",
+    height=20000,
+    width=20000,
+)
+
+
+# Add css to make the iframe fullscreen
+
+st.markdown(
+    """
+<style>
+    iframe {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
 # Enhanced Custom CSS for animations
 st.markdown("""
     <style>
+        
         body {
-            background-color: #1A2B44;
-            color: white;
             font-family: 'Arial', sans-serif;
+        }
+        p{
+            color: white;
+        }
+        h1{
+            color: white;
         }
         .stApp {
             background: linear-gradient(to right, #001F3F, #0074D9);
@@ -67,25 +113,26 @@ st.markdown("""
         }
         .stButton > button:hover {
             background: #00AEEF;
+            
         }
         .stTextArea > textarea, .stTextInput > div > div > input {
             font-size: 16px;
-            background-color: #0E1B30;
+            background-color: #000000;
             color: white;
             border-radius: 6px;
             padding: 10px;
         }
         .sidebar .sidebar-content {
-            background-color: #0E1B30;
+            background-color: #000000;
             color: white;
         }
         h1, h2, h3, h4 {
-            color: #00AEEF;
+            color: #000000;
             text-align: center;
             animation: float 4s ease-in-out infinite;
         }
         .stFileUploader {
-            border: 2px dashed #00AEEF;
+            border: 2px dashed #000000;
             padding: 15px;
             border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.1);
@@ -103,28 +150,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Add Particles.js for animated background
-st.markdown("""
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <div id="particles-js" style="position:fixed; width:100%; height:100vh; z-index:-1;"></div>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 80, "density": {"enable": true, "value_area": 800} },
-                "color": { "value": "#00AEEF" },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.5 },
-                "size": { "value": 3, "random": true },
-                "move": { "enable": true, "speed": 2, "direction": "none" }
-            },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": { "onhover": {"enable": true, "mode": "repulse"} }
-            },
-            "retina_detect": true
-        });
-    </script>
-""", unsafe_allow_html=True)
+
+
+
+
 
 
 # Streamlit App Layout
@@ -136,88 +165,111 @@ st.markdown("""
 EcoGenAI is an advanced AI and LLM-powered platform designed specifically for the aircraft industry. It helps engineers, technicians, and aviation experts analyze aircraft images, detect faults, and get AI-driven maintenance advice. Users can upload images to detect issues, chat with the AI for expert guidance, and even analyze aircraft engine sounds to identify potential anomalies, making it a comprehensive solution for predictive maintenance.
 """)
 
-# Streamlit App Layout
-st.title("🚀 Predictive Maintenance AI")
-st.markdown("Upload an image of your equipment and chat with AI for maintenance insights.")
 
-# Layout with Two Columns: Image Upload & Chatbox
+
+st.markdown("Upload an **image** or **aircraft engine sound**, and chat with AI for maintenance insights.")
+
+# Layout with Two Columns: Image & Audio Upload in Column 1, AI Chat in Column 2
 col1, col2 = st.columns([1, 1.2])
 
-# 📌 Column 1: Image Upload and Prediction
 with col1:
-    st.subheader("📸 Upload Aircraft Image for Analysis")
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
+    st.subheader("🛠️ Upload Aircraft Image OR Engine Sound")
 
-    prediction_result = None
+    # ✅ Unified Upload Box in First Column
+    st.markdown('<div class="upload-box">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("📷 Upload Image or 🎵 Upload Audio", type=["jpg", "png", "jpeg", "mp3"])
+    st.markdown('</div>', unsafe_allow_html=True)  # Close the upload box
+
+    # ✅ Variables to Hold Processing Results
+    image_predictions = None
+    audio_predictions = None
     annotated_image_url = None
 
+    # 📌 Ensure the Correct AI Processing Based on File Type
     if uploaded_file:
-        # Show image preview
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_container_width=True)
+        file_extension = uploaded_file.name.split(".")[-1].lower()
 
-        # Upload Image to Backend
-        with st.spinner("🛠️ Processing image..."):
-            files = {"file": uploaded_file.getvalue()}
-            response = requests.post(UPLOAD_URL, files=files)
+        # ✅ If Image is Uploaded
+        if file_extension in ["jpg", "jpeg", "png"]:
+            st.image(Image.open(uploaded_file), caption="Uploaded Image", use_container_width=True)
 
-            if response.status_code == 200:
-                response_json = response.json()
-                prediction_result = response_json.get("predictions", [])
-                annotated_image_url = response_json.get("annotated_image_url")
-                if prediction_result:
-                    detected_faults = "\n".join([f"✅ {p['label']} - {p['confidence']}" for p in prediction_result])
-                    st.success(f"🔍 **Detected Faults:**\n{detected_faults}")
+            with st.spinner("🛠️ Processing image..."):
+                files = {"file": uploaded_file.getvalue()}
+                response = requests.post(UPLOAD_URL, files=files)
 
-                    # Display Annotated Image (Bounding Boxes)
-                    #if annotated_image_url:
-                        #st.image(RESULT_IMAGE_PATH, caption="🖼️ Predicted Image", use_container_width=True)
-                    if annotated_image_url:
-                        st.image(annotated_image_url, caption="🖼️ Predicted Image", use_container_width=True)
-
+                if response.status_code == 200:
+                    response_json = response.json()
+                    image_predictions = response_json.get("predictions", [])
+                    annotated_image_url = response_json.get("annotated_image_url")
                 else:
-                    st.warning("⚠️ No faults detected in the image.")
-            else:
-                st.error("❌ Error processing image!")
+                    st.error("❌ Error processing image!")
 
-# 📌 Column 2: AI Chatbox (ONLY ENABLED AFTER PREDICTION)
+        # ✅ If Audio is Uploaded
+        elif file_extension == "mp3":
+            with st.spinner("🔊 Processing audio..."):
+                files = {"file": ("audio.mp3", uploaded_file.getvalue(), "audio/mpeg")}
+                response = requests.post(AUDIO_UPLOAD_URL, files=files)
+
+                if response.status_code == 200:
+                    response_json = response.json()
+                    audio_predictions = response_json.get("predictions", [])
+                else:
+                    st.error("❌ Error processing audio file!")
+
+    # ✅ Show "Prediction Results" ONLY AFTER processing is done
+    if image_predictions is not None or audio_predictions is not None:
+        st.markdown("---")  # Horizontal Line for Separation
+        st.subheader("📊 Prediction Results")
+
+        # ✅ Display Image Predictions
+        if image_predictions is not None:
+            detected_faults = "\n".join([f"✅ {p['label']} - {p['confidence']}" for p in image_predictions])
+            st.success(f"🔍 **Detected Faults (Image):**\n{detected_faults}")
+
+            if annotated_image_url:
+                st.image(annotated_image_url, caption="🖼️ Predicted Image", use_container_width=True)
+
+        # ✅ Display Audio Predictions
+        elif audio_predictions is not None:
+            st.success(f"🔍 **Audio Analysis Result:** {response_json['message']}")
+
+# 📌 AI Chatbox in Second Column
 with col2:
-    st.subheader("💬 AI Chatbot - Get Maintenance Insights")
+    # ✅ AI Chat for Image Predictions
+    if image_predictions is not None and audio_predictions is None:
+        st.subheader("📷 AI Chat for Image Faults")
+        user_input_image = st.text_area("Ask about image-based faults:", key="image_chat")
 
-    if prediction_result:
-        user_input = st.text_area("Ask a question about the detected issue:", placeholder="Type your question here...")
-
-        if st.button("📝 Generate Report", key="chat_button"):
+        if st.button("📝 Get Image Report", key="image_report_button"):
             with st.spinner("🤖 Fetching AI response..."):
-                chat_payload = {
-                    "prompt": user_input,
-                    "predictions": prediction_result
-                }
+                chat_payload = {"prompt": user_input_image, "predictions": image_predictions, "file_type": "image"}
+               
                 response = requests.post(CHAT_URL, json=chat_payload)
 
             if response.status_code == 200:
                 chat_response = response.json()
+                st.markdown("### 🧠 AI Response (Image)")
+                st.info(chat_response.get("response", "No response available."))
+            else:
+                st.error("❌ AI response not available. Check server logs.")
 
-                print("Raw Chat API Response:", chat_response)  # Debugging
+    # ✅ AI Chat for Audio Predictions
+    elif audio_predictions is not None and image_predictions is None:
+        st.subheader("🎵 AI Chat for Audio Anomalies")
+        user_input_audio = st.text_area("Ask about engine sound issues:", key="audio_chat")
 
-                st.markdown("### 🧠 AI Response")
+        if st.button("📝 Get Audio Report", key="audio_report_button"):
+            with st.spinner("🤖 Fetching AI response..."):
+                chat_payload = {"prompt": user_input_audio, "predictions": audio_predictions, "file_type": "audio"}
+                
+                response = requests.post(CHAT_URL, json=chat_payload)
 
-                if "response" in chat_response:
-                    st.info(chat_response["response"])
-                else:
-                    st.error("❌ AI response not available. Check server logs.")
+            if response.status_code == 200:
+                chat_response = response.json()
+                st.markdown("### 🧠 AI Response (Audio)")
+                st.info(chat_response.get("response", "No response available."))
+            else:
+                st.error("❌ AI response not available. Check server logs.")
 
-# 📌 Column 3: Audio Upload for Engine Sound
-st.subheader("🎵 Upload Aircraft Engine Sound")
-audio_file = st.file_uploader("Upload an MP3 file...", type=["mp3"])
-
-if audio_file:
-    with st.spinner("🔊 Processing audio..."):
-        files = {"file": audio_file.getvalue()}
-        response = requests.post(AUDIO_UPLOAD_URL, files=files)
-
-        if response.status_code == 200:
-            response_json = response.json()
-            st.success(f"🔍 **Audio Analysis Result:** {response_json['message']}")
-        else:
-            st.error("❌ Error processing audio file!")
+    elif image_predictions is None and audio_predictions is None:
+        st.warning("⚠️ Upload an image or an audio file to enable AI chat.")
