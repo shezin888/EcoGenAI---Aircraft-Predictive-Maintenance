@@ -25,7 +25,7 @@ html(
       #particles {
          width: 5000px;
          height: 5000px;
-         background-color: lightgreen;
+         
       }
    </style>
 </head>
@@ -34,6 +34,13 @@ html(
    </div>
    <script>
       tsParticles.load("particles", {
+         background: {
+                
+                image: "linear-gradient(to right, #001F3F, #0074D9);",
+                position: "50% 50%",
+                size: "cover",
+                repeat: "no-repeat"
+            },
          particles: {
             number: {
                value: 1000
@@ -80,9 +87,13 @@ st.markdown("""
             font-family: 'Arial', sans-serif;
         }
         p{
-            color: black;
+            color: white;
+        }
+        h1{
+            color: white;
         }
         .stApp {
+            background: linear-gradient(to right, #001F3F, #0074D9);
             color: white;
             padding: 20px;
         }
@@ -102,22 +113,22 @@ st.markdown("""
         }
         .stTextArea > textarea, .stTextInput > div > div > input {
             font-size: 16px;
-            background-color: #fcfcfc;
+            background-color: #000000;
             color: white;
             border-radius: 6px;
             padding: 10px;
         }
         .sidebar .sidebar-content {
-            background-color: #fcfcfc;
+            background-color: #000000;
             color: white;
         }
         h1, h2, h3, h4 {
-            color: #fcfcfc;
+            color: #000000;
             text-align: center;
             animation: float 4s ease-in-out infinite;
         }
         .stFileUploader {
-            border: 2px dashed #fcfcfc;
+            border: 2px dashed #000000;
             padding: 15px;
             border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.1);
